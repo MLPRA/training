@@ -1,5 +1,5 @@
 import numpy as np
-import json
+import xml.etree.ElementTree as ET
 import os
 
 from chainer.dataset import DatasetMixin
@@ -20,40 +20,39 @@ class DataLoader(DatasetMixin):
                 if os.path.splitext(filename)[1] not in ['.jpg']:  # , '.png']: check chainer.utils.read_image()
                     continue
 
-                img_filename = os.path.join(root, filename)
-                anno_filename = os.path.splitext(img_filename)[0] + '.json'
-                if not os.path.exists(anno_filename):
+                img_filepath = os.path.join(root, filename)
+                anno_filepath = os.path.splitext(img_filepath)[0] + '.xml'
+                if not os.path.exists(anno_filepath):
                     continue
 
-                self.filepaths.append((img_filename, anno_filename))
+                self.filepaths.append((img_filepath, anno_filepath))
 
     def __len__(self):
         return len(self.filepaths)
 
     def detect_labels(self):  # just utility
-        detected_labels = []
+        detected_labels = set({})
 
-        for img_filename, anno_filename in self.filepaths:
-            with open(anno_filename) as annotation_file:
-                annotations = json.load(annotation_file)
-            detected_labels.append(annotations['label'])
+        for _, anno_filepath in self.filepaths:
+            xml = ET.parse(anno_filepath)
+            for anno in xml.findall('.object'):
+                detected_labels.add(anno.find('name').text)
 
-        return list(set(detected_labels))
+        return sorted(list(detected_labels))
 
     def get_example(self, i):
         if i >= self.__len__():
             raise IndexError
         img = read_image(self.filepaths[i][0])
-        with open(self.filepaths[i][1]) as annotation_file:
-            annotations = json.load(annotation_file)  # ['labels']
+        xml = ET.parse(self.filepaths[i][1])
 
         bboxes = []
         labels = []
-        # for anno in annotations:
-        anno = annotations  # del and indent
-        x, y, h, w = (anno['boundingBox']['x'], anno['boundingBox']['y'], anno['boundingBox']['height'], anno['boundingBox']['width'])  # del ['boundingBox']
-        bboxes.append([y, x, y + h, x + w])
-        labels.append(self.label_names.index(anno['label']))
+        for anno in xml.findall('.object'):
+            bbox = anno.find('bndbox')
+            bboxes.append([bbox.find('xmin').text, bbox.find('ymin').text,
+                           bbox.find('xmax').text, bbox.find('ymax').text])
+            labels.append(self.label_names.index(anno.find('name').text))
 
         bboxes = np.array(bboxes, dtype=np.float32)
         labels = np.array(labels, dtype=np.int32)

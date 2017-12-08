@@ -12,6 +12,7 @@ from chainer.datasets import TransformDataset
 from chainercv.extensions import DetectionVOCEvaluator
 from chainercv.links.model.ssd import GradientScaling
 from chainercv.links.model.ssd import multibox_loss
+from chainercv.links import SSD300
 from chainercv.links import SSD512
 
 from chainercv import transforms
@@ -104,7 +105,7 @@ def train(train_data, val_data, label_names,
           log_iteration, loaderjob,
           resume):
 
-    model = SSD512(n_fg_class=len(label_names), pretrained_model='imagenet')
+    model = SSD300(n_fg_class=len(label_names), pretrained_model='imagenet')
     model.use_preset('evaluate')
 
     train_chain = MultiboxTrainChain(model)  # alpha and k?
