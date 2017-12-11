@@ -21,7 +21,7 @@ class DataLoader(DatasetMixin):
                     continue
 
                 img_filepath = os.path.join(root, filename)
-                anno_filepath = os.path.splitext(img_filepath)[0] + '.xml'
+                anno_filepath = os.path.splitext(os.path.join(root, 'annotations', filename))[0] + '.xml'
                 if not os.path.exists(anno_filepath):
                     continue
 
