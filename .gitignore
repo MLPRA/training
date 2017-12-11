@@ -107,3 +107,5 @@ ENV/
 
 annotated_images/
 annotated_images
+
+result/
