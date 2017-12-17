@@ -45,18 +45,13 @@ class DataLoader(DatasetMixin):
             raise IndexError
         img = read_image(self.filepaths[i][0])
         xml = ET.parse(self.filepaths[i][1])
-        width = int(xml.find('size/width').text)
-        height = int(xml.find('size/height').text)
 
         bboxes = []
         labels = []
         for anno in xml.findall('.object'):
             bbox = anno.find('bndbox')
-            ymin = int(bbox.find('ymin').text) / height
-            xmin = int(bbox.find('xmin').text) / width
-            ymax = int(bbox.find('ymax').text) / height
-            xmax = int(bbox.find('xmax').text) / width
-            bboxes.append([ymin, xmin, ymax, xmax])
+            bboxes.append([bbox.find('ymin').text, bbox.find('xmin').text,
+                           bbox.find('ymax').text, bbox.find('xmax').text])
             labels.append(self.label_names.index(anno.find('name').text))
 
         bboxes = np.array(bboxes, dtype=np.float32)
