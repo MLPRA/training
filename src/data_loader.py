@@ -50,9 +50,13 @@ class DataLoader(DatasetMixin):
         labels = []
         for anno in xml.findall('.object'):
             bbox = anno.find('bndbox')
-            bboxes.append([bbox.find('ymin').text, bbox.find('xmin').text,
-                           bbox.find('ymax').text, bbox.find('xmax').text])
-            labels.append(self.label_names.index(anno.find('name').text))
+            ymin = int(bbox.find('ymin').text)
+            xmin = int(bbox.find('xmin').text)
+            ymax = int(bbox.find('ymax').text)
+            xmax = int(bbox.find('xmax').text)
+            bboxes.append([ymin, xmin, ymax, xmax])
+            labels.append(0)
+            # labels.append(self.label_names.index(anno.find('name').text))
 
         bboxes = np.array(bboxes, dtype=np.float32)
         labels = np.array(labels, dtype=np.int32)

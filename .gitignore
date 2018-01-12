@@ -105,6 +105,7 @@ ENV/
 *.jpg
 *.json
 
+annotated_images_test/
 annotated_images/
 annotated_images
 
