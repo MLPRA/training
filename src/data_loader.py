@@ -55,9 +55,15 @@ class DataLoader(DatasetMixin):
             ymax = int(bbox.find('ymax').text)
             xmax = int(bbox.find('xmax').text)
             bboxes.append([ymin, xmin, ymax, xmax])
-            labels.append(0)
+
+            label_name = anno.find('name').text
+            if label_name == 'no_building':
+                labels.append(1)
+            else:
+                labels.append(0)
             # labels.append(self.label_names.index(anno.find('name').text))
 
         bboxes = np.array(bboxes, dtype=np.float32)
         labels = np.array(labels, dtype=np.int32)
+
         return img, bboxes, labels
